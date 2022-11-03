@@ -1,5 +1,5 @@
 import uuid
-from PseudoCode import PseudoCode
+from PyChart.PseudoCode import PseudoCode
 
 
 class BlockDiagram:
@@ -22,10 +22,15 @@ class BlockDiagram:
     _last_if_id_list = []
     _last_arrow_pos_delta = 15
 
-    def __init__(self, code_tree: list, variables: list, base_coor=None, name='main',
+    def __init__(self, code_tree: list,
+                 variables: list,
+                 base_coor=None,
+                 name='main',
                  start_block_index=0) -> None:
+
         if base_coor is None:
             base_coor = {'y': 0, 'x': 0}
+
         self._last_x = base_coor['x']
         self._last_y = base_coor['y']
         self._name = name
@@ -46,12 +51,18 @@ class BlockDiagram:
                                                                uuid.uuid1().hex, '0',
                                                                'Ввод / вывод'))
         self._diagram['blocks'].insert(0,
-                                       self._form_block(f'Начало {name}', {'y': self._last_y - 100, 'x': self._last_x},
-                                                        uuid.uuid1().hex, '0', 'Начало / конец'))
+                                       self._form_block(f'Начало {name}',
+                                                        {'y': self._last_y - 100, 'x': self._last_x},
+                                                        uuid.uuid1().hex,
+                                                        '0',
+                                                        'Начало / конец'))
         self._diagram['blocks'] += self._add_blocks(self._code_tree)
         if self._name == 'main':
             self._diagram['blocks'].append(
-                self._form_block('Конец', {'y': self._last_y + 100, 'x': self._last_x}, uuid.uuid1().hex, '0',
+                self._form_block('Конец',
+                                 {'y': self._last_y + 100, 'x': self._last_x},
+                                 uuid.uuid1().hex,
+                                 '0',
                                  'Начало / конец'))
 
         self._set_block_indexes()

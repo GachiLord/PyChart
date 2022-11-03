@@ -1,7 +1,7 @@
 from setuptools import setup
 
 setup(name='PyChart',
-      version='0.5.0',
+      version='0.5.1',
       description='Framework for building CLI-tools, translating code to json for block-diagram-redactor site',
       url='',
       author='GachiLord',

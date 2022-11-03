@@ -5,7 +5,8 @@ from abc import ABC, abstractmethod
 class Preprocessor(ABC):
     def __init__(self, file: Iterable) -> None:
         self._file = file
-        self._parsed_code = self._parse()
+        self._parsed_code = []
+        self._parse()
         self._serealized_code = self._get_serealized_code(self._parsed_code)
 
     @abstractmethod
