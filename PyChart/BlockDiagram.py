@@ -1,5 +1,4 @@
 import uuid
-from PyChart.PseudoCode import PseudoCode
 
 
 class BlockDiagram:
@@ -22,7 +21,9 @@ class BlockDiagram:
     _last_if_id_list = []
     _last_arrow_pos_delta = 15
 
-    def __init__(self, code_tree: list,
+    def __init__(self,
+                 pseudocode,
+                 code_tree: list,
                  variables: list,
                  base_coor=None,
                  name='main',
@@ -31,6 +32,7 @@ class BlockDiagram:
         if base_coor is None:
             base_coor = {'y': 0, 'x': 0}
 
+        self._pseudocode = pseudocode
         self._last_x = base_coor['x']
         self._last_y = base_coor['y']
         self._name = name
@@ -73,7 +75,7 @@ class BlockDiagram:
         return self._diagram
 
     @staticmethod
-    def build_from_programs_list(programs: list):
+    def build_from_programs_list(programs: list, pseudocode):
         y = 0
         last_index = 0
         super_diagram = {
@@ -84,7 +86,7 @@ class BlockDiagram:
         }
 
         for prog in programs:
-            diagram = BlockDiagram(prog['code'], prog['variables'], {'y': y, 'x': 0}, prog['name'], last_index)
+            diagram = BlockDiagram(pseudocode, prog['code'], prog['variables'], {'y': y, 'x': 0}, prog['name'], last_index)
             diagram = diagram.build()
 
             # find last index
@@ -115,7 +117,7 @@ class BlockDiagram:
         size = BlockDiagram._get_size_of_block(text.split('\n'))
         if block_type == 'none':
             return
-        text = BlockDiagram._to_pseudocode(text)
+        text = self._to_pseudocode(text)
         if text.strip() == '':
             return
 
@@ -295,9 +297,8 @@ class BlockDiagram:
             block['index'] = count
             count += 1
 
-    @staticmethod
-    def _to_pseudocode(lines: str) -> str:
-        return PseudoCode.to_pseudocode(lines)
+    def _to_pseudocode(self, lines: str) -> str:
+        return self._pseudocode.to_pseudocode(lines)
 
     def _draw_arrow(self, start_end_pos: dict, start_end_indexes: dict, direction: dict) -> None:
         dirs = self._direction
