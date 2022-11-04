@@ -45,14 +45,14 @@ class Preprocessor(ABC):
         """
         pass
 
-    @staticmethod
-    def _get_function_name(line: str):
+    @abstractmethod
+    def _get_function_name(self, line: str):
         """
         Args:
             line: function declaration line
 
         """
-        return line
+        pass
 
     @abstractmethod
     def _find_all_veribles(self, code: list) -> list:
@@ -75,7 +75,7 @@ class Preprocessor(ABC):
             head = list(fun.keys())[0]
 
             variables = self._find_all_veribles(body)
-            name = Preprocessor._get_function_name(head)
+            name = self._get_function_name(head)
             variables += self._get_fun_args(head, name)
 
             programs_list.append({'code': body, 'name': name, 'variables': variables})
@@ -91,8 +91,8 @@ class Preprocessor(ABC):
 
         return programs_list
 
-    @staticmethod
-    def _get_fun_args(line: str, fun_name='') -> list:
+    @abstractmethod
+    def _get_fun_args(self, line: str, fun_name='') -> list:
         """
         Returns args of selected function.
 

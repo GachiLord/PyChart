@@ -1,7 +1,8 @@
 import uuid
+from abc import ABC, abstractmethod
 
 
-class BlockDiagram:
+class BlockDiagram(ABC):
     _diagram = {
         "blocks": [],
         "arrows": [],
@@ -75,7 +76,7 @@ class BlockDiagram:
         return self._diagram
 
     @staticmethod
-    def build_from_programs_list(programs: list, pseudocode):
+    def build_from_programs_list(programs: list, pseudocode, diagram_class):
         y = 0
         last_index = 0
         super_diagram = {
@@ -86,7 +87,7 @@ class BlockDiagram:
         }
 
         for prog in programs:
-            diagram = BlockDiagram(pseudocode, prog['code'], prog['variables'], {'y': y, 'x': 0}, prog['name'], last_index)
+            diagram = diagram_class(pseudocode, prog['code'], prog['variables'], {'y': y, 'x': 0}, prog['name'], last_index)
             diagram = diagram.build()
 
             # find last index
@@ -97,8 +98,8 @@ class BlockDiagram:
             y += len(diagram['blocks']) * 100
 
             # delete last blocks and arrows, because of pythons vars are links xD.
-            BlockDiagram._diagram['blocks'] = []
-            BlockDiagram._diagram['arrows'] = []
+            diagram_class._diagram['blocks'] = []
+            diagram_class._diagram['arrows'] = []
 
         return super_diagram
 
@@ -143,7 +144,7 @@ class BlockDiagram:
 
         return block
 
-    @staticmethod
+    @abstractmethod
     def _get_struct_type(line: str) -> str:
         """
         It returns code-line type.
@@ -201,7 +202,7 @@ class BlockDiagram:
             begin += 1
         return True
 
-    @staticmethod
+    @abstractmethod
     def _get_bd_type_of_line(line: str) -> str:
         """
         It returns line type for BlockDiagram redactor.
