@@ -21,6 +21,7 @@ class BlockDiagram(ABC):
     _last_y = 0
     _last_if_id_list = []
     _last_arrow_pos_delta = 15
+    _blocks_indent = 150
 
     def __init__(self,
                  pseudocode,
@@ -95,7 +96,7 @@ class BlockDiagram(ABC):
 
             super_diagram['blocks'] += diagram['blocks']
             super_diagram['arrows'] += diagram['arrows']
-            y += len(diagram['blocks']) * 100
+            y += len(diagram['blocks']) * diagram_class._blocks_indent
 
             # delete last blocks and arrows, because of pythons vars are links xD.
             diagram_class._diagram['blocks'] = []
@@ -234,14 +235,14 @@ class BlockDiagram(ABC):
         for code in code_tree:
             cur_el_id = uuid.uuid1().hex
             if type(code) == str:
-                self._last_y += 100
+                self._last_y += self._blocks_indent
                 block = self._form_block(code, {'x': 0, 'y': self._last_y}, cur_el_id, parent_id)
                 if block is not None:
                     blocks.append(block)
                 else:
-                    self._last_y -= 100
+                    self._last_y -= self._blocks_indent
             else:
-                self._last_y += 100
+                self._last_y += self._blocks_indent
                 key = list(code.keys())[0]
                 value = list(code.values())[0]
                 block = self._form_block(key, {'x': 0, 'y': self._last_y}, cur_el_id, parent_id)
@@ -251,15 +252,15 @@ class BlockDiagram(ABC):
                     blocks.append(block)
                     blocks += self._add_blocks(value, cur_el_id)
                 elif 'else' == key.replace(':', '').strip():
-                    self._last_y -= 100
+                    self._last_y -= self._blocks_indent
                     blocks += self._add_blocks(value, self._last_if_id_list[-1] + '-else')
                     self._last_if_id_list.pop()
                 elif 'elif' in key:
-                    self._last_y -= 100
+                    self._last_y -= self._blocks_indent
                     blocks += self._add_blocks(value, self._last_if_id_list[-1] + '-else')
                     self._last_if_id_list.pop()
                 else:
-                    self._last_y -= 100
+                    self._last_y -= self._blocks_indent
                     blocks += self._add_blocks(value, self._last_if_id_list[-1])
 
         return blocks
