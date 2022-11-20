@@ -302,7 +302,7 @@ class BlockDiagram(ABC):
     def _to_pseudocode(self, lines: str) -> str:
         return self._pseudocode.to_pseudocode(lines)
 
-    def _draw_arrow(self, start_end_pos: dict, start_end_indexes: dict, direction: dict) -> None:
+    def _draw_arrow(self, start_end_pos: dict, start_end_indexes: dict, direction: dict, y_correction=0) -> None:
         dirs = self._direction
         delta = self._last_arrow_pos_delta - 1
         arrow = {
@@ -319,37 +319,52 @@ class BlockDiagram(ABC):
         x2 = start_end_pos['end']['x']
         y2 = start_end_pos['end']['y']
 
+        # set direction coef
         x_direction_coef = 1
         if direction['start'] == dirs['LEFT']:
             x_direction_coef = -1
 
+        # nested control struct body
         if direction['start'] == dirs['LEFT'] and direction['end'] == dirs['RIGHT']:
+            # first node
             arrow['nodes'].append({'x': x1, 'y': y1})
 
+            # look for free left node and set it
             while not self._is_path_free({'start': {'x': x1, 'y': y1}, 'end': {'x': x2, 'y': y1}}, 'x'):
                 y1 += 50
 
+            # add correction
+            y1 += (y_correction-y1)
+            # set node
             arrow['nodes'].append({'x': x1 + delta, 'y': y1})
 
+            # look for free right node
             while not self._is_path_free({'start': {'x': x1, 'y': y1}, 'end': {'x': x1, 'y': y2}}, 'y'):
-                x1 += 50
+                x1 += 100
 
+            # set right and other nodes
             arrow['nodes'].append({'x': x1 + delta, 'y': y1})
             arrow['nodes'].append({'x': x1 + delta, 'y': y2})
             arrow['nodes'].append({'x': x2, 'y': y2})
 
+        # loop body
         elif direction['start'] == dirs['DOWN'] and direction['end'] == dirs['RIGHT']:
+            # first node
             arrow['nodes'].append({'x': x1, 'y': y1})
+            # go down 50 for correct display
             y1 += 50
             arrow['nodes'].append({'x': x1, 'y': y1})
 
+            # look for free node
             while not self._is_path_free({'start': {'x': x1, 'y': y1}, 'end': {'x': x1, 'y': y2}}, 'y'):
-                x1 += 50 * x_direction_coef
+                x1 += 100 * x_direction_coef
 
+            # set nodes
             arrow['nodes'].append({'x': x1 + delta, 'y': y1})
             arrow['nodes'].append({'x': x1 + delta, 'y': y2})
             arrow['nodes'].append({'x': x2, 'y': y2})
 
+        # other cases
         else:
             arrow['nodes'].append({'x': x1, 'y': y1})
             if not self._is_path_free({'start': {'x': x1, 'y': y1}, 'end': {'x': x2, 'y': y2}}):
@@ -363,14 +378,22 @@ class BlockDiagram(ABC):
             else:
                 arrow['nodes'].append({'x': x2, 'y': y2})
 
+        # add 1 to counts arr
         for _ in arrow['nodes']:
             arrow['counts'].append(1)
         self._last_arrow_pos_delta -= 1
         self._diagram['arrows'].append(arrow)
 
     def _connect_blocks(self, block1: dict, block2: dict, direction: dict) -> None:
+        # check struct type
+        y_correction = 0
+        if block1['struct_type'] in ['if', 'elif']:
+            if_body = self._find_blocks_by_property('parent_id', block1['cur_el_id'])
+            y_correction = if_body[-1]['y'] + if_body[-1]['height'] / 2 + 30
+
+        # draw
         self._draw_arrow({'start': {'y': block1['y'], 'x': block1['x']}, 'end': {'y': block2['y'], 'x': block2['y']}},
-                         {'start': block1['index'], 'end': block2['index']}, direction)
+                         {'start': block1['index'], 'end': block2['index']}, direction, y_correction)
 
     def _align_if_else_bodies(self) -> None:
         if_structs = self._find_blocks_by_property('struct_type', 'if')
